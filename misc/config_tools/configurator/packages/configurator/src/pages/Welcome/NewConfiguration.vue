@@ -20,9 +20,9 @@
       <tr>
         <td>
           <div class="py-4 text-right">
-            <button
-                type="button" class="wel-btn btn btn-primary btn-lg"
-                @click="usingWorkingFolder"
+            <button ref="inputName"
+                    type="button" class="wel-btn btn btn-primary btn-lg"
+                    @click="usingWorkingFolder" @keyup.enter="usingWorkingFolder"
             >
               Use this Folder
             </button>
@@ -49,6 +49,12 @@ export default {
       defaultWorkingFolder,
       WorkingFolder
     }
+  },
+  mounted() {
+
+    this.$nextTick(() => {
+      this.$refs.inputName.focus()
+    })
   },
   methods: {
     nextPage(folderPath) {
@@ -129,6 +135,9 @@ export default {
       }).then((folderPath) => {
         if (folderPath.length > 0)
           this.WorkingFolder = folderPath + window.systemInfo.pathSplit
+        this.$nextTick(() => {
+          this.$refs.inputName.focus()
+        })
       })
     }
   }
