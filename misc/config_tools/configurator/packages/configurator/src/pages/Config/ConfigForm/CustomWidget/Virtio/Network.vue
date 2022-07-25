@@ -5,7 +5,14 @@
         <b style="margin-bottom: 2rem">Virtio network device</b>
         <b-row class="align-items-center my-2 mt-4">
           <b-col md="2">
-            <label>Virtio framework: </label>
+            <label>
+              <n-popover trigger="hover" placement="top-start">
+              <template #trigger>
+                <IconInfo/>
+              </template>
+              <span v-html="this.NetworkConfiguration.properties.virtio_framework.description"></span>
+              </n-popover>Virtio framework:
+            </label>
           </b-col>
           <b-col md="4">
             <b-form-select v-model="network.virtio_framework" :options="NetworkFrameworkType"/>
@@ -14,10 +21,20 @@
 
         <b-row class="align-items-center my-2">
           <b-col md="2">
-            <label>Network interface name: </label>
+            <label>
+              <n-popover trigger="hover" placement="top-start">
+              <template #trigger>
+                <IconInfo/>
+              </template>
+              <span v-html="this.NetworkConfiguration.properties.interface_name.description"></span>
+              </n-popover>Network interface name:
+            </label>
           </b-col>
           <b-col md="4">
-            <b-form-input v-model="network.interface_name"/>
+            <b-form-input :state="validateInterfaceName(network.interface_name)" v-model="network.interface_name" placeholder="An arbitrary-long string with letters, digits, underscores or dashes."/>
+            <b-form-invalid-feedback>
+                An arbitrary-long string with letters, digits, underscores or dashes.
+            </b-form-invalid-feedback>
           </b-col>
         </b-row>
       </div>
@@ -54,10 +71,11 @@ import _ from "lodash";
 import {Icon} from "@vicons/utils";
 import {Plus, Minus} from '@vicons/fa'
 import {fieldProps, vueUtils} from '@lljj/vue3-form-naive';
+import IconInfo from '@lljj/vjsf-utils/icons/IconInfo.vue';
 
 export default {
   name: "Network",
-  components: {Icon, Plus, Minus},
+  components: {Icon, Plus, Minus, IconInfo},
   props: {
     ...fieldProps,
     fieldProps: {
@@ -67,6 +85,7 @@ export default {
   },
   data() {
     return {
+      NetworkConfiguration: this.rootSchema.definitions['VirtioNetworkConfiguration'],
       NetworkFrameworkType: this.rootSchema.definitions['VirtioNetworkFrameworkType']['enum'],
       NetworkFrameworkDefault: this.rootSchema.definitions['VirtioNetworkConfiguration']['properties']['virtio_framework']['default'],
       defaultVal: vueUtils.getPathVal(this.rootFormData, this.curNodePath)
@@ -90,6 +109,10 @@ export default {
     }
   },
   methods: {
+    validateInterfaceName(value) {
+      var regexp = new RegExp(this.NetworkConfiguration.properties.interface_name.pattern);
+      return (value != null) && regexp.test(value);
+    },
     removeVirtioNetwork(index) {
       this.defaultVal.splice(index, 1);
     },
@@ -107,19 +130,23 @@ export default {
 </script>
 
 <style scoped>
-label:after{
+label:before{
   content: '*';
   color: red;
 }
 .ToolSet {
   display: flex;
-  flex-direction: row-reverse;
-  gap: 8px;
+  justify-content: space-around;
+  margin: 1rem;
+  gap: 0.5rem;
+  max-width: 5rem;
 }
-.ToolSet div{
-  padding: 8px;
-  border: 1px solid rgb(193,193,193);
-  border-radius: 5px;
+.ToolSet div {
+  cursor: pointer;
+  border: 1px solid gray;
+  border-radius: 3px;
+  background: #f9f9f9;
+  padding: 5px 5px 3px;
 }
 .virtio_networks{
   width: 100%;
@@ -134,7 +161,7 @@ label:after{
 .virtio_network_demo {
   width: 100%;
   border: 2px solid #cccccc;
-  padding: 8px 0 12px 6px;
+  padding: 12px 0 12px 6px;
   border-radius: 5px;
   margin-bottom: 1rem;
 }

@@ -4,8 +4,15 @@
       <div class="virtio_input_demo">
         <b style="margin-bottom: 2rem">Virtio input device</b>
         <b-row class="align-items-center my-2 mt-4">
-          <b-col md="2">
-            <label>Backend device file: </label>
+          <b-col md="3">
+            <label>
+              <n-popover trigger="hover" placement="top-start">
+              <template #trigger>
+                <IconInfo/>
+              </template>
+              <span v-html="this.InputConfiguration.properties.backend_device_file.description"></span>
+              </n-popover>Backend device file:
+            </label>
           </b-col>
           <b-col md="8">
             <b-form-select v-model="input.backend_device_file" :options="BackendDeviceFileType"/>
@@ -13,11 +20,20 @@
         </b-row>
 
         <b-row class="align-items-center my-2">
-          <b-col md="2">
+          <b-col md="3">
+            <n-popover trigger="hover" placement="top-start">
+              <template #trigger>
+                <IconInfo/>
+              </template>
+              <span v-html="this.InputConfiguration.properties.id.description"></span>
+            </n-popover>
             Guest virtio input device unique identifier:
           </b-col>
           <b-col md="4">
-            <b-form-input v-model="input.id"/>
+            <b-form-input :state="validateId(input.id)" v-model="input.id" placeholder="An arbitrary-long string with letters, digits, underscores or dashes."/>
+            <b-form-invalid-feedback>
+                An arbitrary-long string with letters, digits, underscores or dashes.
+            </b-form-invalid-feedback>
           </b-col>
         </b-row>
       </div>
@@ -54,10 +70,11 @@ import _ from "lodash";
 import {Icon} from "@vicons/utils";
 import {Plus, Minus} from '@vicons/fa'
 import {fieldProps, vueUtils} from '@lljj/vue3-form-naive';
+import IconInfo from '@lljj/vjsf-utils/icons/IconInfo.vue';
 
 export default {
   name: "Input",
-  components: {Icon, Plus, Minus},
+  components: {Icon, Plus, Minus, IconInfo},
   props: {
     ...fieldProps,
     fieldProps: {
@@ -67,6 +84,7 @@ export default {
   },
   data() {
     return {
+      InputConfiguration: this.rootSchema.definitions['VirtioInputConfiguration'],
       BackendDeviceFileType: this.rootSchema.definitions['VirtioInputConfiguration']['properties']['backend_device_file']['enum'],
       defaultVal: vueUtils.getPathVal(this.rootFormData, this.curNodePath)
     };
@@ -89,6 +107,10 @@ export default {
     }
   },
   methods: {
+    validateId(value) {
+      var regexp = new RegExp(this.InputConfiguration.properties.id.pattern);
+      return (value != null) && regexp.test(value);
+    },
     removeVirtioInput(index) {
       this.defaultVal.splice(index, 1);
     },
@@ -106,19 +128,23 @@ export default {
 </script>
 
 <style scoped>
-label:after{
+label:before{
   content: '*';
   color: red;
 }
 .ToolSet {
   display: flex;
-  flex-direction: row-reverse;
-  gap: 8px;
+  justify-content: space-around;
+  margin: 1rem;
+  gap: 0.5rem;
+  max-width: 5rem;
 }
-.ToolSet div{
-  padding: 8px;
-  border: 1px solid rgb(193,193,193);
-  border-radius: 5px;
+.ToolSet div {
+  cursor: pointer;
+  border: 1px solid gray;
+  border-radius: 3px;
+  background: #f9f9f9;
+  padding: 5px 5px 3px;
 }
 .virtio_inputs{
   width: 100%;
@@ -133,7 +159,7 @@ label:after{
 .virtio_input_demo {
   width: 100%;
   border: 2px solid #cccccc;
-  padding: 8px 0 12px 6px;
+  padding: 12px 0 12px 6px;
   border-radius: 5px;
   margin-bottom: 1rem;
 }

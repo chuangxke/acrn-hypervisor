@@ -86,6 +86,7 @@ ASL_COMPILER ?= $(shell which iasl)
 DPKG_BIN ?= $(shell which dpkg)
 YARN_BIN ?= $(shell which yarn)
 CARGO_BIN ?= $(shell which cargo)
+IASL_MIN_VER = "20190703"
 
 .PHONY: all hypervisor devicemodel tools life_mngr doc
 all: hypervisor devicemodel tools
@@ -96,7 +97,7 @@ all: hypervisor devicemodel tools
 	  python3 misc/packaging/gen_acrn_deb.py acrn_all $(ROOT_OUT) --version=$(FULL_VERSION) --board_name="$$DEB_BOARD" --scenario="$$DEB_SCENARIO"; \
 	fi
 
-HV_MAKEOPTS := -C $(T)/hypervisor BOARD=$(BOARD) SCENARIO=$(SCENARIO) HV_OBJDIR=$(HV_OUT) RELEASE=$(RELEASE)
+HV_MAKEOPTS := -C $(T)/hypervisor BOARD=$(BOARD) SCENARIO=$(SCENARIO) HV_OBJDIR=$(HV_OUT) RELEASE=$(RELEASE) ASL_COMPILER=$(ASL_COMPILER) IASL_MIN_VER=$(IASL_MIN_VER)
 
 board_inspector:
 	@if [ -x "$(DPKG_BIN)" ]; then \
@@ -132,7 +133,7 @@ hvapplydiffconfig:
 	@$(MAKE) applydiffconfig $(HV_MAKEOPTS) PATCH=$(abspath $(PATCH))
 
 devicemodel: tools
-	$(MAKE) -C $(T)/devicemodel DM_OBJDIR=$(DM_OUT) DM_BUILD_VERSION=$(BUILD_VERSION) DM_BUILD_TAG=$(BUILD_TAG) DM_ASL_COMPILER=$(ASL_COMPILER) TOOLS_OUT=$(TOOLS_OUT) RELEASE=$(RELEASE)
+	$(MAKE) -C $(T)/devicemodel DM_OBJDIR=$(DM_OUT) DM_BUILD_VERSION=$(BUILD_VERSION) DM_BUILD_TAG=$(BUILD_TAG) TOOLS_OUT=$(TOOLS_OUT) RELEASE=$(RELEASE) IASL_MIN_VER=$(IASL_MIN_VER)
 
 tools:
 	mkdir -p $(TOOLS_OUT)

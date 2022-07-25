@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Intel Corporation.
+ * Copyright (C) 2018-2022 Intel Corporation.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -231,9 +231,16 @@ void init_pcpu_post(uint16_t pcpu_id)
 
 	init_pcpu_xsave();
 
+#ifdef CONFIG_RETPOLINE
+	disable_rrsba();
+#endif
+
 	if (pcpu_id == BSP_CPU_ID) {
 		/* Print Hypervisor Banner */
 		print_hv_banner();
+
+		/* Initialie HPET */
+		hpet_init();
 
 		/* Calibrate TSC Frequency */
 		calibrate_tsc();
